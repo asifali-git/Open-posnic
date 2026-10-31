@@ -11,6 +11,26 @@
         <div class="custom-mode-setting loader-customer">
             <form id='customer_add_form'>
                 <div class="form-row">
+                    <div class="form-group col-md-12 d-flex align-items-center">
+                        <div style="flex: 0 0 72px;">
+                            <img id="customer_photo_preview" src="static/images/default/user.svg" alt="Customer photo" class="img-fluid rounded" style="width: 72px; height: 72px; object-fit: cover;" loading="lazy" decoding="async">
+                        </div>
+                        <div class="ml-3 flex-grow-1">
+                            <label for="customer_photo_file" class="mb-1">
+                                <lang class="lang_image">Photo</lang>
+                            </label>
+                            <input type="file" class="form-control-file" id="customer_photo_file" accept="image/jpeg,image/png,image/webp">
+                            <!-- Carries the image-store key in the save payload; an
+                                 empty value clears the photo. -->
+                            <input type="hidden" name="image" id="customer_photo_key" value="">
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="customer_photo_remove" style="display:none;" onclick="PosnicPro.customers.photoClear();">
+                                <i class="feather icon-x mr-1"></i><lang class="lang_ai_key_remove">Remove</lang>
+                            </button>
+                            <small class="form-text text-muted">JPG, PNG or WebP, up to 5 MB.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
                     <div class="form-group col-md-12">
                         <label for="customer_name">
                             <lang class="lang_name_title"> Name </lang>
@@ -261,6 +281,12 @@
                                         <div class="table-responsive">
                                             <table class="table table-border table-striped mb-0">
                                                 <tbody>
+                                                    <tr>
+                                                        <th scope="row">
+                                                <lang class="lang_image"> Photo </lang> :
+                                                </th>
+                                                <td><img id="customer_photo_view" src="static/images/default/user.svg" alt="Customer photo" class="rounded" style="width: 64px; height: 64px; object-fit: cover;" loading="lazy" decoding="async"></td>
+                                                </tr>
                                                     <tr>
                                                         <th scope="row">
                                                 <lang class="lang_name_title"> Name </lang> :

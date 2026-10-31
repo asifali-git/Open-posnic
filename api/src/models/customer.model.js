@@ -45,6 +45,11 @@ class CustomerModel extends BaseModel {
       allow_shared_phone: { type: 'Boolean', select: true, default: false },
       alternatePhone: { type: 'String', select: true },
 
+      /* Profile photo. A content-addressed image-store key
+         (<tenant>/<kind>/<sha256>.<ext>), rendered through the same
+         /uploads/<key> path as an item image - never a URL, never a filename. */
+      image: { type: 'String', select: true },
+
       // Address Information
       address: { type: 'String', select: true },
       city: { type: 'String', select: true },
@@ -231,6 +236,7 @@ class CustomerModel extends BaseModel {
       email: '',
       phone: '',
       alternatePhone: '',
+      image: '',
       address: '',
       city: '',
       state: '',

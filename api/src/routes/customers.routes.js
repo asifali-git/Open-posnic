@@ -16,6 +16,13 @@ const {
 // Ensure all customer routes require authentication to populate req.user
 router.use(protect);
 
+// Customer photos live in the same keyed image store as item images, under
+// their own kind. attachImageKey() reads this before it mints the key.
+const customerImageKind = (req, res, next) => {
+  req.imageKind = 'customers';
+  next();
+};
+
 // GET /api/customers - Get all customers with pagination and filters
 router.get(
   '/',
@@ -182,9 +189,24 @@ router.get(
   })
 );
 
+// POST /api/customers/:id/photo - Upload (or replace) the customer's photo
+router.post(
+  '/:id/photo',
+  customerImageKind,
+  upload.single('image'),
+  asyncHandler(async (req, res) => {
+    customersController.setRequestContext(req);
+    return await customersController.uploadCustomerPhoto(req, res);
+  })
+);
+
 // POST /api/customers - Create new customer
+// (upload before validate so multipart fields are in req.body when the
+// validators run; plain JSON requests pass through multer untouched)
 router.post(
   '/',
+  customerImageKind,
+  upload.single('image'),
   validateCreateCustomer,
   asyncHandler(async (req, res) => {
     customersController.setRequestContext(req);
@@ -225,6 +247,8 @@ router.put(
 // PUT /api/customers/:id - Update customer (define after preferences)
 router.put(
   '/:id',
+  customerImageKind,
+  upload.single('image'),
   validateUpdateCustomer,
   asyncHandler(async (req, res) => {
     customersController.setRequestContext(req);

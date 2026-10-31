@@ -483,6 +483,9 @@ PosnicPro.customers = {
                         db.customerDisplay.put({id: '1', 'clear': 'no', 'get': 'no', customer: customerRecord});
                         hasher.setHash('customers');
                     }
+                    /* A photo chosen on this form rides along after save - the
+                       endpoint needs the customer id, so it uploads second. */
+                    PosnicPro.customers.photoUpload(data.customer_id || data._id || data.id);
                     $('.customer-trigger').val('');
                     loader.find(".loadingSpinner:first").remove();
                     /*This function call for updating customername.json,getcustomers.json file */
@@ -546,6 +549,7 @@ PosnicPro.customers = {
         $("#customer_viewBalance").html(customer_viewBalance);
         $('#customer_view_phone_icon').attr('href', 'tel:' + data.phone);
         $('#customer_view_email_icon').attr('href', 'mailto:' + data.email);
+        $('#customer_photo_view').attr('src', data.image ? '/uploads/' + data.image : 'static/images/default/user.svg');
         $.each(data, function (key, val) {
             if (val === '') {
                 $('#customer_view_' + key).text('');
@@ -586,10 +590,10 @@ PosnicPro.customers = {
     /*Edit added customer in view customer page*/
     editCustomer: function (id) {
         var loader = $(".loader-customer");
-        $("<div class='loadingSpinner'></div>").appendTo(loader);
-            $('#customer_title').text(PosnicPro.i18n.t('lang_action_edit', 'Edit'));
+        $("<div class='loadingSpinner'></div>").appendTo(loader);            $('#customer_title').text(PosnicPro.i18n.t('lang_action_edit', 'Edit'));
             $('#customer_button_title').text(PosnicPro.i18n.t('lang_updatebtn_title', 'Update'));
-        $(".infobar-settings-sidebar-overlay").css({"background": "rgba(0,0,0,0.4)", "position": "fixed"});
+            PosnicPro.customers.photoInit();
+            $(".infobar-settings-sidebar-overlay").css({"background": "rgba(0,0,0,0.4)", "position": "fixed"});
         $("#infobar-settings-sidebar-customer").addClass("sidebarshow");
         var params = {
             url: 'customers/getCustomerDetails',
@@ -609,6 +613,7 @@ PosnicPro.customers = {
                 $('#customer_address').val(data.address);
                 $('#customer_city').val(data.city);
                 $('#customer_shared_phone').prop('checked', data.allow_shared_phone === true);
+                PosnicPro.customers.photoShow(data.image || '');
                 $('#customer_country').val(data.country).trigger('change.select2');
                 $('#customer_category').val(data.category_id).trigger("change");
                 $('#customer_referrer_name').val(data.referrer_name);
@@ -752,11 +757,65 @@ PosnicPro.customers = {
     resetEditButton: function (id) {
         PosnicPro.customers.editCustomer(id);
     },
+    /*
+     * Customer photo. One file input, one preview, one hidden key.
+     *
+     * The chosen file previews locally the moment it is picked; the bytes are
+     * uploaded to customers/:id/photo AFTER the customer is saved, because the
+     * endpoint needs the id. Until then only the preview and the file input
+     * hold it. The hidden input carries the STORE KEY in the normal save
+     * payload, so edit/remove need no second request.
+     */
+    photoInit: function () {
+        $('#customer_photo_file').off('change.customerPhoto').on('change.customerPhoto', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                PosnicPro.alert('warning', PosnicPro.i18n.t('lang_photo_must_be_5mb', 'Photo must be 5 MB or smaller'));
+                $(this).val('');
+                return;
+            }
+            $('#customer_photo_preview').attr('src', URL.createObjectURL(file));
+            $('#customer_photo_remove').show();
+        });
+    },
+    /* Show a stored image-store key (or nothing) as the current photo. */
+    photoShow: function (key) {
+        $('#customer_photo_key').val(key || '');
+        if (key) {
+            $('#customer_photo_preview').attr('src', '/uploads/' + key);
+            $('#customer_photo_remove').show();
+        } else {
+            $('#customer_photo_preview').attr('src', 'static/images/default/user.svg');
+            $('#customer_photo_remove').hide();
+        }
+    },
+    photoClear: function () {
+        $('#customer_photo_file').val('');
+        PosnicPro.customers.photoShow('');
+    },
+    /* Upload the pending file once the customer has an id; no file/no id = no-op. */
+    photoUpload: function (customerId) {
+        var input = document.getElementById('customer_photo_file');
+        if (!input || !input.files || !input.files.length || !customerId) return;
+        var data = new FormData();
+        data.append('image', input.files[0]);
+        PosnicPro.requestImage('POST', 'customers/' + customerId + '/photo', data, false, function (response) {
+            if (response.type === 'success') {
+                $('#customer_photo_file').val('');
+                PosnicPro.customers.photoShow(response.data.image);
+            } else {
+                PosnicPro.alert(response.type, response.message);
+            }
+        });
+    },
     addCustomerButton: function () {
         var loader = $(".loader-customer");
         loader.find(".loadingSpinner:first").remove();
             $('#customer_title').text(PosnicPro.i18n.t('lang_new_title', 'Add'));
             $('#customer_button_title').text(PosnicPro.i18n.t('lang_save_title', 'Save'));
+        PosnicPro.customers.photoInit();
+        PosnicPro.customers.photoClear();
         $('#customer_id').val('');
         $('#customers_new .alert').remove();
 
@@ -773,6 +832,7 @@ PosnicPro.customers = {
     customerClearForm: function () {
         PosnicPro.customers.loadSelectCustomerState(PosnicPro.local.get('countryid'), 'clear');
         $('#customer_add_form')[0].reset();
+        PosnicPro.customers.photoClear();
         $('#customer_country').val(PosnicPro.local.get("country_setting")).trigger('change.select2');
         PosnicPro.local.set('edit_customer_state', PosnicPro.local.get("state_setting"));
         $('#customer_city').val(PosnicPro.local.get("city_setting") || "");

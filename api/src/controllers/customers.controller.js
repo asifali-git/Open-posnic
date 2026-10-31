@@ -8,8 +8,23 @@ const { ObjectId } = require('mongodb');
 const { ERROR_MESSAGES, DEFAULTS } = require('../constants/customers.constants');
 const { normalizeBoolean } = require('../helpers/customers.helper');
 const sessionFilterUtil = require('../utils/session-filter.util');
+const store = require('../utils/image-store');
 
 const BaseModel = require('../models/base.model');
+
+/*
+ * The photo half of a customer record.
+ *
+ * A freshly uploaded file wins: attachImageKey() has already moved its bytes
+ * into the content-addressed store and left the key on req.file.imageKey. A
+ * key arriving in the body is accepted only when it is one the store could
+ * itself have minted, so no foreign path ever lands on the image field.
+ */
+function customerPhotoFrom(req) {
+  if (req.file && req.file.imageKey) return req.file.imageKey;
+  const body = typeof req.body?.image === 'string' ? req.body.image.trim() : '';
+  return store.isValidKey(body) ? body : '';
+}
 
 /**
  * Customer Controller (Refactored)
@@ -215,6 +230,8 @@ class CustomerController extends BaseController {
        */
       company_name: req.body.company_name || '',
       notes: req.body.notes,
+      // Profile photo - see customerPhotoFrom().
+      image: customerPhotoFrom(req),
       tags: req.body.tags || [],
       balance: req.body.balance || DEFAULTS.BALANCE,
       partial_balance: normalizeBoolean(req.body.partial_balance),
@@ -348,6 +365,19 @@ class CustomerController extends BaseController {
     // PHP always sets this as boolean; mirror that here.
     updateData.partial_balance = normalizeBoolean(req.body.partial_balance);
 
+    /*
+     * Profile photo. A fresh upload wins; a body value clears the photo when
+     * empty and is ignored unless it is a key this store minted - the same
+     * rule as create, so a PUT can never write a foreign path.
+     */
+    if (req.file && req.file.imageKey) {
+      updateData.image = req.file.imageKey;
+    } else if ('image' in updateData) {
+      const bodyImage = typeof updateData.image === 'string' ? updateData.image.trim() : '';
+      if (bodyImage && !store.isValidKey(bodyImage)) delete updateData.image;
+      else updateData.image = bodyImage;
+    }
+
     // Add updated by information with ObjectId conversion
     if (this.user) {
       updateData.updated_by = this.user.username;
@@ -368,6 +398,42 @@ class CustomerController extends BaseController {
 
     if (result.status) {
       return this.sendResponse(res, result.data, result.message, 200);
+    } else {
+      return this.sendError(res, result.message, 400, null);
+    }
+  });
+
+  /**
+   * Upload (or replace) the customer's photo
+   * POST /api/customers/:id/photo
+   */
+  uploadCustomerPhoto = asyncHandler(async (req, res) => {
+    this.setRequestContext(req);
+
+    const { id } = req.params;
+
+    // attachImageKey() mints the key; without a file there is nothing to store.
+    if (!req.file || !req.file.imageKey) {
+      return this.sendError(res, 'Photo upload failed', 400, null);
+    }
+
+    const updateData = { image: req.file.imageKey };
+    if (this.user) {
+      updateData.updated_by = this.user.username;
+      if (this.user._id) {
+        updateData.updated_by_id = new ObjectId(this.user._id);
+      }
+    }
+
+    const result = await this.service.updateCustomer(id, updateData);
+
+    if (result.status) {
+      return this.sendResponse(
+        res,
+        { image: req.file.imageKey, url: req.file.imageUrl },
+        result.message,
+        200
+      );
     } else {
       return this.sendError(res, result.message, 400, null);
     }

@@ -434,6 +434,116 @@ describe('CustomerController — createCustomer', () => {
   });
 });
 
+// ─── customer photo ──────────────────────────────────────────────────────────
+
+describe('CustomerController — customer photo', () => {
+  // A key exactly as image-store mints it on a till (no tenant record).
+  const PHOTO_KEY = `local/customers/${'a'.repeat(64)}.jpg`;
+  const baseBody = { name: 'Alice', phone: '9876543210' };
+
+  it('stores a freshly uploaded imageKey on create', async () => {
+    service.createCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({
+      body: { ...baseBody, image: 'ignored-when-a-file-won' },
+      file: { imageKey: PHOTO_KEY },
+    });
+    const res = mockResponse();
+    await ctrl.createCustomer(req, res);
+    const [customerData] = service.createCustomer.mock.calls[0];
+    expect(customerData.image).toBe(PHOTO_KEY);
+  });
+
+  it('accepts a valid image-store key arriving in the body', async () => {
+    service.createCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({ body: { ...baseBody, image: PHOTO_KEY } });
+    const res = mockResponse();
+    await ctrl.createCustomer(req, res);
+    const [customerData] = service.createCustomer.mock.calls[0];
+    expect(customerData.image).toBe(PHOTO_KEY);
+  });
+
+  it('never lets a foreign path onto the image field', async () => {
+    service.createCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({ body: { ...baseBody, image: '../../etc/passwd' } });
+    const res = mockResponse();
+    await ctrl.createCustomer(req, res);
+    const [customerData] = service.createCustomer.mock.calls[0];
+    expect(customerData.image).toBe('');
+  });
+
+  it('an uploaded file wins over the body key on update', async () => {
+    service.updateCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({
+      params: { id: VALID_ID },
+      body: { image: 'some-other-key' },
+      file: { imageKey: PHOTO_KEY },
+    });
+    const res = mockResponse();
+    await ctrl.updateCustomer(req, res);
+    const [, updateData] = service.updateCustomer.mock.calls[0];
+    expect(updateData.image).toBe(PHOTO_KEY);
+  });
+
+  it('drops a foreign path on update instead of writing it', async () => {
+    service.updateCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({
+      params: { id: VALID_ID },
+      body: { name: 'X', image: 'http://evil.example/x.jpg' },
+    });
+    const res = mockResponse();
+    await ctrl.updateCustomer(req, res);
+    const [, updateData] = service.updateCustomer.mock.calls[0];
+    expect(updateData.image).toBeUndefined();
+  });
+
+  it('an empty body image clears the photo on update', async () => {
+    service.updateCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+    const req = mockRequest({ params: { id: VALID_ID }, body: { image: '' } });
+    const res = mockResponse();
+    await ctrl.updateCustomer(req, res);
+    const [, updateData] = service.updateCustomer.mock.calls[0];
+    expect(updateData.image).toBe('');
+  });
+
+  describe('uploadCustomerPhoto', () => {
+    it('returns 400 when no file arrived', async () => {
+      const req = mockRequest({ params: { id: VALID_ID } });
+      const res = mockResponse();
+      await ctrl.uploadCustomerPhoto(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(service.updateCustomer).not.toHaveBeenCalled();
+    });
+
+    it('stores the uploaded key on the customer and returns its url', async () => {
+      service.updateCustomer.mockResolvedValue({ status: true, data: {}, message: 'ok' });
+      const req = mockRequest({
+        params: { id: VALID_ID },
+        file: { imageKey: PHOTO_KEY, imageUrl: `/uploads/${PHOTO_KEY}` },
+      });
+      const res = mockResponse();
+      await ctrl.uploadCustomerPhoto(req, res);
+      expect(service.updateCustomer).toHaveBeenCalledWith(
+        VALID_ID,
+        expect.objectContaining({ image: PHOTO_KEY })
+      );
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ image: PHOTO_KEY, url: `/uploads/${PHOTO_KEY}` }),
+        })
+      );
+    });
+
+    it('surfaces a service failure as 400', async () => {
+      service.updateCustomer.mockResolvedValue({ status: false, message: 'Customer not found' });
+      const req = mockRequest({ params: { id: VALID_ID }, file: { imageKey: PHOTO_KEY } });
+      const res = mockResponse();
+      await ctrl.uploadCustomerPhoto(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
+  });
+});
+
 // ─── updateCustomer ───────────────────────────────────────────────────────────
 
 describe('CustomerController — updateCustomer', () => {
