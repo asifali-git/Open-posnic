@@ -1,0 +1,103 @@
+# Build the Windows installer.
+#
+# A fork's own pipeline: press Run (or push to main/develop) and the workflow
+# produces Posnic-<version>-windows-x64-installer.exe as a downloadable
+# artifact. It deliberately does NOT publish a release - an unsigned build
+# must never reach an updater channel, and a fork has no signing secrets.
+#
+# The build steps mirror beta.yml (the pipeline this forks from), minus the
+# CI gate, version stamping and multi-platform matrix: the artifact here is
+# for a person to download and run, not for a till to update into.
+name: Build Windows exe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+    # Documentation and licence changes do not need an installer built.
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+
+concurrency:
+  group: build-windows
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # `npm ci` refuses to run when package.json and package-lock.json
+      # disagree, so the installs come first and nothing is stamped after.
+      - name: Install
+        run: npm ci
+
+      - name: Install the frontend build toolchain
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install the API dependencies
+        working-directory: api
+        run: npm ci
+
+      # The installer bundles MongoDB Community Server; the version is pinned
+      # by src/download-mongodb.bat and the same DLLs a clean Windows needs are
+      # copied out of System32 (see beta.yml for the full matrix).
+      - name: Fetch the bundled MongoDB
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -oE 'set MONGODB_VERSION=[0-9.]+' src/download-mongodb.bat | cut -d= -f2)
+          echo "MongoDB $VERSION, the version src/download-mongodb.bat pins"
+          curl -fsSL -o mongodb.zip "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-${VERSION}.zip"
+          7z x -bso0 mongodb.zip -omongodb-temp
+          mkdir -p mongodb/bin
+          cp "mongodb-temp/mongodb-win32-x86_64-windows-${VERSION}/bin/mongod.exe" mongodb/bin/
+          for dll in msvcp140.dll vcruntime140.dll vcruntime140_1.dll; do
+            cp "/c/Windows/System32/$dll" mongodb/bin/
+          done
+          rm -rf mongodb.zip mongodb-temp
+          node scripts/check-mongodb-binaries.js
+
+      - name: Prepare everything the installer bundles
+        run: npm run prepare:bundle
+
+      # Deliberately unsigned (a fork has no certificate), so the build must
+      # not bake in update-signature verification: an installed copy that
+      # verified would refuse the next build from this pipeline.
+      # --publish never keeps electron-builder away from the upstream
+      # Posnic/POS release config entirely.
+      - name: Build
+        run: npx electron-builder --win --x64 --publish never --config.win.verifyUpdateCodeSignature=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Native binaries can load on a clean Windows
+        run: node scripts/check-native-runtime.js
+
+      # Unit tests import modules; they never boot the thing. This does - a
+      # duplicate ipcMain.handle once shipped a build that sat on "Starting
+      # services" for ever.
+      - name: The application actually starts
+        run: node scripts/check-app-boots.js
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: Posnic-Windows-installer
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+          if-no-files-found: error
+          retention-days: 14
