@@ -148,8 +148,11 @@ PosnicPro.settings = {
      * India keeps exactly its current look; the gst_action machinery is
      * untouched. Presentation only, and failure leaves things as they are.
      */
+    /* GST is removed in this fork: no country and no stored decision can
+       turn invoicing GST back on, so every consumer of this gate lands on
+       the disable path. */
     indianGstEnabled: function (country, setting) {
-        return ['india', 'in', 'ind'].includes(String(country || '').trim().toLowerCase()) && setting === 'gst_on';
+        return false;
     },
     applyCountryFields: function (country, scope) {
         var india = ['india', 'in', 'ind'].includes(String(country || '').trim().toLowerCase());
@@ -186,9 +189,11 @@ PosnicPro.settings = {
                Indian GST select visible to a shop in Berlin - the old toggle
                only ran inside the settings-data callback. */
             PosnicPro.local.set('tax_profile_code', d.code || '');
-            var isIndia = ['india', 'in', 'ind'].includes(String(d.country || d.code || '').trim().toLowerCase());
-            $('.hide_indian_gst,.indian-gstr').toggle(isIndia);
-            $('#tax_system_india').toggle(isIndia);
+            /* GST removed in this fork: the India GST surfaces stay hidden
+               whatever the profile resolves to. */
+            var isIndia = false;
+            $('.hide_indian_gst,.indian-gstr').hide();
+            $('#tax_system_india').hide();
             var dec = d.decisions || {};
             $('#tax_regime_override').val(dec.tax_regime || '');
             $('#india_gst_type').val(dec.india_gst_type || 'regular');
@@ -699,24 +704,12 @@ PosnicPro.settings = {
                     branchRecord.push({ name: response.data['branch_name'], phone: response.data['store_telephone'], email: response.data['store_email'], address: response.data['store_address'], image: response.data['branch_image'] });
                     db.customerDisplay.put({ id: '2', 'clear': 'no', 'get': 'no', branch: branchRecord });
                     PosnicPro.commonDate();
+                    /* GST surfaces are gone in this fork: hidden and disabled
+                       whatever the shop's country or stored decision. */
                     $('.hide_indian_gst').hide();
                     $('.indian-gstr').hide();
+                    $('.disable_indian_gst').hide();
                     PosnicPro.local.set('gst_action', 'disable');
-                    if (response.data['country'] === 'India') {
-                        $('.hide_indian_gst').show();
-                        $('.indian-gstr').show();
-                        if ($('#indian_gst').val() === 'gst_on') {
-                            $('.disable_indian_gst').show();
-                            PosnicPro.local.set('gst_action', 'enable');
-                        } else {
-                            $('.disable_indian_gst').hide();
-                            PosnicPro.local.set('gst_action', 'disable');
-                        }
-                    } else {
-                        $('.hide_indian_gst').hide();
-                        $('.indian-gstr').hide();
-                        PosnicPro.local.set('gst_action', 'disable');
-                    }
                     PosnicPro.settings.applyTaxProfile();
                     PosnicPro.settings.taxSystemLoad();
                     loader.find(".loadingSpinner:first").remove();
@@ -1333,19 +1326,14 @@ if ($wrapper.length) {
                 $('#branch_fssai_number').val(data.branch_fssai_number || '');
                 if (data.country === 'India') {
                     $('.branch-gstin-hide-show').show();
-                    $('.hide_indian_gst').show();
-                    if (data.indian_gst === 'gst_on') {
-                        $('.disable_indian_gst').show();
-                        PosnicPro.local.set('gst_action', 'enable');
-                    } else {
-                        $('.disable_indian_gst').hide();
-                        PosnicPro.local.set('gst_action', 'disable');
-                    }
                 } else {
                     $('.branch-gstin-hide-show').hide();
-                    $('.hide_indian_gst').hide();
-                    PosnicPro.local.set('gst_action', 'disable');
                 }
+                /* GST removed in this fork: every GST surface stays hidden
+                   and invoicing GST stays off. */
+                $('.hide_indian_gst').hide();
+                $('.disable_indian_gst').hide();
+                PosnicPro.local.set('gst_action', 'disable');
                 PosnicPro.settings.applyTaxProfile(data.country);
 
                 $('#setting_country,#customer_country,#supplier_country,#branch_country').val(data.country);

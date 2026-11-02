@@ -87,7 +87,7 @@ test("legacy HSN gate refreshes after country load without hiding ordinary tax",
   dom.window.close();
 });
 
-test("Indian GST cannot be activated by a saved flag outside India", () => {
+test("Indian GST cannot be activated by a saved flag in any country", () => {
   const { dom, w } = fixture();
   const start = settings.indexOf("    indianGstEnabled: function");
   const end = settings.indexOf("    applyCountryFields:", start);
@@ -104,10 +104,7 @@ test("Indian GST cannot be activated by a saved flag outside India", () => {
     "",
     undefined,
   ]) {
-    assert.equal(
-      w.taxGate.indianGstEnabled(country, "gst_on"),
-      ["India", "IN", "ind"].includes(country),
-    );
+    assert.equal(w.taxGate.indianGstEnabled(country, "gst_on"), false, String(country));
     assert.equal(w.taxGate.indianGstEnabled(country, "gst_off"), false);
   }
   dom.window.close();
