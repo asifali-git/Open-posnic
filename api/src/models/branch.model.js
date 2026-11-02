@@ -894,11 +894,11 @@ class BranchModel {
 
       // PHP lines 228-244: Ensure currency_value exists for frontend currency dropdown
       if (!withDefaults.currency_value || withDefaults.currency_value.length === 0) {
-        // Default to INR if not set (matches PHP default)
+        // Default to PKR if not set
         withDefaults.currency_value = [
           {
-            currency_text: 'INR',
-            currency_sign: '₹',
+            currency_text: 'PKR',
+            currency_sign: '₨',
           },
         ];
       }
@@ -1130,8 +1130,8 @@ class BranchModel {
 
       const currencyType = [
         {
-          currency_text: 'INR',
-          currency_sign: '₹',
+          currency_text: 'PKR',
+          currency_sign: '₨',
         },
       ];
 
@@ -1150,9 +1150,9 @@ class BranchModel {
         theme: 'blue',
         logo: 'store.png',
         indian_gst: 'gst_off', // Default to gst_off, can be overridden by settings
-        currency: '₹',
-        currency_text: 'India Rupee / INR or ₹',
-        currency_type: '₹',
+        currency: '₨',
+        currency_text: 'Pakistan Rupee / PKR or ₨',
+        currency_type: '₨',
         currency_value: currencyType,
         time_zone: 'Asia/Kolkata', // Should come from settings or user
         printing_address: data.address?.trim(),

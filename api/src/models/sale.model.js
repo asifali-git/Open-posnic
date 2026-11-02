@@ -1317,7 +1317,7 @@ Sale.sendDailySalesMail = async function (input, shopTransport = null) {
     const config = require('../config');
 
     // Currency sign (fallback)
-    const currency = '₹'; // You can get this from settings if needed
+    const currency = '₨'; // You can get this from settings if needed
 
     // Totals + product rows
     const product_values = [];

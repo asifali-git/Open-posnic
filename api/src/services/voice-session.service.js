@@ -342,7 +342,7 @@ function instructionsFor(storefront, menu, settings, lang, body) {
     '',
     `SHOP: ${ai.fence(String(store.name || 'this shop').slice(0, 80))}`,
     `KIND: ${store.kind === 'retail' ? 'shop' : 'restaurant'}`,
-    `CURRENCY: ${String(store.currency || '').slice(0, 4) || 'INR'}`,
+    `CURRENCY: ${String(store.currency || '').slice(0, 4) || 'PKR'}`,
     languageLine(lang),
     `OPENING LINE: ${ai.fence(openingLine(storefront, settings))}`,
     ...servicePointBrief(storefront, body),

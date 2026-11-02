@@ -246,7 +246,7 @@ function shopFacts(storefront) {
   const facts = {
     name: text(store.name || 'this shop', 80),
     kind: store.kind === 'retail' ? 'shop' : 'restaurant',
-    currency: text(store.currency_code || store.currency || 'INR', 8),
+    currency: text(store.currency_code || store.currency || 'PKR', 8),
   };
   if (text(store.address)) facts.address = text(store.address, 200);
   if (text(store.phone)) facts.phone = text(store.phone, 60);
@@ -475,7 +475,7 @@ async function reply(body, storefront, context) {
   const prompt = [
     `SHOP: ${ai.fence(String(store.name || 'this shop').slice(0, 80))}`,
     `KIND: ${store.kind === 'retail' ? 'shop' : 'restaurant'}`,
-    `CURRENCY: ${String(store.currency || '').slice(0, 4) || 'INR'}`,
+    `CURRENCY: ${String(store.currency || '').slice(0, 4) || 'PKR'}`,
     '',
     'MENU (JSON; what can be ordered right now: id, name, category, price, diet, about, served):',
     ai.fence(JSON.stringify(lists.open)),

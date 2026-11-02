@@ -702,7 +702,7 @@ class SettingModel extends BaseModel {
       const currency_type = [
         {
           currency_text: data.currencyTextname?.trim() || '',
-          currency_sign: data.currencyText?.trim() || '₹',
+          currency_sign: data.currencyText?.trim() || '₨',
         },
       ];
 
@@ -902,9 +902,9 @@ class SettingModel extends BaseModel {
         country: data.setting_country?.trim() || '',
         country_id: data.country_id?.trim() || '',
         state: data.setting_state?.trim() || '',
-        currency: data.currencyText?.trim() || '₹',
-        currency_text: data.currency_setting?.trim() || 'India Rupee / INR or ₹',
-        currency_type: data.currency_type?.trim() || '₹',
+        currency: data.currencyText?.trim() || '₨',
+        currency_text: data.currency_setting?.trim() || 'Pakistan Rupee / PKR or ₨',
+        currency_type: data.currency_type?.trim() || '₨',
         currency_value: currency_type,
         time_zone: cleanTimezone,
         printing_address: data.printing_address?.trim() || '',
@@ -1060,7 +1060,7 @@ class SettingModel extends BaseModel {
 
       const collection = await this.getCollection();
       const text = (value) => (value === undefined || value === null ? '' : String(value).trim());
-      const currencySymbol = text(data.currencyText || data.currency_type) || '₹';
+      const currencySymbol = text(data.currencyText || data.currency_type) || '₨';
       const currencyName = text(data.currencyTextname || data.currency_setting) || currencySymbol;
       const currencyValue = [
         {

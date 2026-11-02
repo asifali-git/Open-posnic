@@ -131,9 +131,9 @@ describe('install currency resolution (the INR hardcode fix)', () => {
     });
   });
 
-  test('unknown or absent countries keep the historical INR default', () => {
-    expect(svc._currencyForCountry('Atlantis').currency_value[0].currency_text).toBe('INR');
-    expect(svc._currencyForCountry('').currency_value[0].currency_text).toBe('INR');
-    expect(svc._currencyForCountry(null).currency_value[0].currency_text).toBe('INR');
+  test('unknown or absent countries fall back to PKR', () => {
+    expect(svc._currencyForCountry('Atlantis').currency_value[0].currency_text).toBe('PKR');
+    expect(svc._currencyForCountry('').currency_value[0].currency_text).toBe('PKR');
+    expect(svc._currencyForCountry(null).currency_value[0].currency_text).toBe('PKR');
   });
 });

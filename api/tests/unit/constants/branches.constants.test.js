@@ -18,8 +18,8 @@ describe('branches.constants', () => {
       TIME_ZONE: 'Asia/Calcutta',
       TIME_FORMAT: 'enable',
       LANGUAGE: 'english',
-      CURRENCY: 'INR',
-      CURRENCY_TEXT: '₹',
+      CURRENCY: 'PKR',
+      CURRENCY_TEXT: '₨',
       THEME: 'default',
       PRINT_TYPE: 'standard',
     });

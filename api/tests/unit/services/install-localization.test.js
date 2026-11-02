@@ -47,9 +47,9 @@ describe('install localization', () => {
       expect(m.currency).toBe('₹');
     });
 
-    it('keeps the INR fallback for an unknown country', () => {
+    it('keeps the PKR fallback for an unknown country', () => {
       const m = service._currencyForCountry('Atlantis');
-      expect(m.currency_value[0].currency_text).toBe('INR');
+      expect(m.currency_value[0].currency_text).toBe('PKR');
     });
 
     it('lets an explicit register_currency win over the country', () => {
@@ -63,7 +63,7 @@ describe('install localization', () => {
       expect(m.currency_value[0].currency_text).toBe('EUR');
     });
 
-    it('every country in the ISO table resolves to a symbol, none fall to INR', () => {
+    it('every country in the ISO table resolves to a symbol, none fall to the PKR default', () => {
       const fs = require('fs');
       const path = require('path');
       const countries = JSON.parse(
@@ -71,7 +71,7 @@ describe('install localization', () => {
       ).countries;
       const wrong = countries.filter((c) => {
         const m = service._currencyForCountry(c.value);
-        return m.currency_value[0].currency_text === 'INR' && c.sortname !== 'IN';
+        return m.currency_value[0].currency_text === 'PKR' && c.sortname !== 'PK';
       });
       expect(wrong.map((c) => c.value)).toEqual([]);
     });

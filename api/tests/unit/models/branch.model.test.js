@@ -782,12 +782,12 @@ describe('BranchModel.getBranchDetails', () => {
     expect(r.data.time_format).toBe('enable');
   });
 
-  test('applies INR default when currency_value is empty', async () => {
+  test('applies PKR default when currency_value is empty', async () => {
     const doc = { _id: validObjId(), branch_name: 'X', currency_value: [] };
     mockModel.findById.mockReturnValue({ lean: jest.fn().mockResolvedValue(doc) });
     const r = await bm.getBranchDetails(validId());
-    expect(r.data.currency_value[0].currency_text).toBe('INR');
-    expect(r.data.currency_value[0].currency_sign).toBe('₹');
+    expect(r.data.currency_value[0].currency_text).toBe('PKR');
+    expect(r.data.currency_value[0].currency_sign).toBe('₨');
   });
 
   test('sets razorKey and razorUrl to null when user context is absent', async () => {

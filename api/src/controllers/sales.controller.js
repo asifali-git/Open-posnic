@@ -1995,7 +1995,7 @@ class SalesController extends BaseController {
       // Get currency symbol from branch settings. Some legacy data contains
       // mojibake for the rupee sign, so normalize it before writing the PDF.
       const normalizeCurrency = (value) => {
-        const raw = (value || '₹').toString().trim();
+        const raw = (value || '₨').toString().trim();
         if (!raw || raw === 'â‚¹' || raw === 'â¹') return '₹';
         return raw;
       };
@@ -4372,7 +4372,7 @@ class SalesController extends BaseController {
         req.user?.settings?.currency ||
         req.user?.branch?.currency ||
         req.user?.branch?.currency_type ||
-        '₹';
+        '₨';
 
       const formatted = results.map((entry) => {
         const total = roundToTwo(entry.total_amount || 0);

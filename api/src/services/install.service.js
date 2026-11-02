@@ -491,7 +491,7 @@ class InstallService {
       currency: DEFAULTS.CURRENCY,
       currency_text: DEFAULTS.CURRENCY_TEXT,
       currency_type: DEFAULTS.CURRENCY_TYPE,
-      currency_value: [{ currency_text: 'INR', currency_sign: '₹' }],
+      currency_value: [{ currency_text: 'PKR', currency_sign: '₨' }],
     };
     const name = String(countryName || '')
       .trim()
