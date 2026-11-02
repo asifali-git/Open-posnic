@@ -24,7 +24,7 @@ before making a package-level licence statement.
 [![Latest release](https://img.shields.io/github/v/release/Posnic/POS?include_prereleases&label=latest&color=blue)](https://github.com/Posnic/POS/releases/latest)
 [![Tests](https://img.shields.io/badge/tests-9%2C000%2B%20passing-brightgreen)](docs/DEVELOPMENT.md#running-the-tests)
 [![Coverage](https://img.shields.io/badge/coverage-69%25%20statements-yellow)](docs/DEVELOPMENT.md#running-the-tests)
-[![API](https://img.shields.io/badge/REST%20API-925%20endpoints-blue)](docs/API.md)
+[![API](https://img.shields.io/badge/REST%20API-926%20endpoints-blue)](docs/API.md)
 [![Source licence](https://img.shields.io/badge/source%20licence-AGPL--3.0-blue)](LICENSE)
 [![Package notices](https://img.shields.io/badge/package%20notices-component%20licences-informational)](THIRD-PARTY-NOTICES.md)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/Posnic/POS/releases/latest)
@@ -100,12 +100,12 @@ without granting marketing reuse.
 |---|---|
 | **Selling** | Fast keyboard and touch billing, barcode scanning, returns, part payments, held bills, quick sale |
 | **Stock** | Items, variants, categories, purchases, supplier returns, inventory logs, low-stock alerts |
-| **Customers** | Customer accounts, categories with their own pricing, outstanding balances |
-| **Tax** | GST invoices, IGST and CGST/SGST, HSN codes, GST reports for filing |
+| **Customers** | Customer accounts, categories with their own pricing, outstanding balances, profile photos |
 | **Restaurants** | Kitchen order tickets, table management, kiosk and customer displays |
 | **Hardware** | Documented paths for thermal printers, barcode scanners, cash drawers, weighing scales and second displays; verify the exact device in the [hardware matrix](docs/HARDWARE_MATRIX.md) |
 | **Reports** | Sales, purchases, inventory, expenses, profit, staff activity — all exportable |
 | **Branches** | Multiple outlets, per-branch stock, staff roles and permissions |
+| **Currency** | PKR (₨) as the default; any currency can be chosen per branch |
 
 ## Install
 
@@ -198,6 +198,10 @@ npm run build:mac
 npm run build:linux
 ```
 
+Pushing to `main` also runs the **Build Windows exe** workflow
+(`.github/workflows/build-windows.yml`); it uploads the installer as the
+`Posnic-Windows-installer` artifact.
+
 New contributors should start with the
 **[contributor quickstart](docs/CONTRIBUTOR_QUICKSTART.md)**. See the
 **[developer guide](docs/DEVELOPMENT.md)** for deeper tests, linting and
@@ -214,7 +218,6 @@ source is AGPL-3.0-only, while bundled components keep their separate licences.
 | Selected local workflows and local operational records | ✅ | ✅ |
 | Local database and backups | ✅ | ✅ |
 | Documented printer, scanner, drawer and scale paths | ✅ | ✅ |
-| GST invoicing and reports | ✅ | ✅ |
 | Runs on your own server, used from a browser | ✅ | ✅ |
 | Sync across tills and branches | | ✅ |
 | Off-site backups, remote dashboard | | ✅ |
@@ -237,9 +240,6 @@ the free edition worse. This is written down in [GOVERNANCE.md](docs/GOVERNANCE.
 | [Architecture](docs/ARCHITECTURE.md) | How it fits together, and the parts that bite |
 | [REST API](docs/API.md) | 925 endpoints, generated from the routes |
 | [Hardware](docs/HARDWARE_MATRIX.md) | Printers, scanners, drawers, scales — and how far each claim is checked |
-| [India e-invoicing](docs/INDIA_EINVOICING_DESIGN.md) | Research, readiness inventory and design for GST e-invoicing as an optional feature; no live IRP submission is built |
-| [India GST return gaps](docs/INDIA_GST_RETURNS_GAPS.md) | What the GST reports compute today, measured against GSTR-1, 3B and 9 |
-| [India government integration](docs/INDIA_GOVERNMENT_INTEGRATION.md) | How software is registered with the GST system, what each route requires, and when to apply |
 | [Backups](docs/BACKUP_POLICY.md) | What is backed up, when, and what it does not protect you from |
 | [Disaster recovery](docs/DISASTER_RECOVERY.md) | Getting back to working, with RPO and RTO as numbers |
 | [Open source POS evaluation checklist](https://posnic.github.io/open-source-pos-evaluation-checklist.html) | Verify licensing, offline checkout, hardware, recovery and maintenance before rollout |
@@ -286,37 +286,7 @@ splitting.
 Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) first. Security issues go to
 [SECURITY.md](.github/SECURITY.md), privately — never a public issue.
 
-## Buy the team a chai ☕
 
-Posnic is built by a small team in Tamil Nadu, India, and given away because a
-shop should not have to rent its own till. If it saves you money, sending a
-little back is what keeps the next release coming.
-
-| | |
-|---|---|
-| ☕ **[Buy us a chai](https://github.com/sponsors/Posnic)** | one-off or monthly, from a dollar up |
-| ☁️ **[Posnic Cloud](https://www.posnic.com/pricing)** | sync, off-site backups, remote dashboards — the paid service that funds this one |
-| 🏢 **Commercial licence** | keep your modifications private — **info@posnic.com** |
-
-Sponsors are named in releases unless they would rather not be.
-
-### For businesses
-
-**Posnic Innovations**, Tamil Nadu, India.
-
-| | |
-|---|---|
-| Sales and licensing | **info@posnic.com** |
-| Support | [SUPPORT.md](.github/SUPPORT.md) · [Discussions](https://github.com/Posnic/POS/discussions) |
-| Security | **info@posnic.com** — privately, never a public issue ([SECURITY.md](.github/SECURITY.md)) |
-| Web | [www.posnic.com](https://www.posnic.com/) |
-
-Paid setup, migration from an existing till, hardware selection, custom
-reporting and white-labelled installers are all available. The software stays
-free either way — see [GOVERNANCE.md](docs/GOVERNANCE.md) for what we have promised
-never to move behind a paywall.
-
-## Source and package licences
 
 Posnic's own source is [GNU AGPL-3.0-only](LICENSE). Use, change, self-host and
 redistribute that source under the licence terms. Release packages also include
