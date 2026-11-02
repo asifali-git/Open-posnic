@@ -17,7 +17,7 @@
                         </div>
                         <div class="ml-3 flex-grow-1">
                             <label for="customer_photo_file" class="mb-1">
-                                <lang class="lang_image">Photo</lang>
+                                <lang class="lang_photo">Photo</lang>
                             </label>
                             <input type="file" class="form-control-file" id="customer_photo_file" accept="image/jpeg,image/png,image/webp">
                             <!-- Carries the image-store key in the save payload; an
@@ -26,7 +26,7 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="customer_photo_remove" style="display:none;" onclick="PosnicPro.customers.photoClear();">
                                 <i class="feather icon-x mr-1"></i><lang class="lang_ai_key_remove">Remove</lang>
                             </button>
-                            <small class="form-text text-muted">JPG, PNG or WebP, up to 5 MB.</small>
+                            <small class="form-text text-muted"><lang class="lang_jpg_png_or_webp">JPG, PNG or WebP.</lang></small>
                         </div>
                     </div>
                 </div>
@@ -283,7 +283,7 @@
                                                 <tbody>
                                                     <tr>
                                                         <th scope="row">
-                                                <lang class="lang_image"> Photo </lang> :
+                                                <lang class="lang_photo"> Photo </lang> :
                                                 </th>
                                                 <td><img id="customer_photo_view" src="static/images/default/user.svg" alt="Customer photo" class="rounded" style="width: 64px; height: 64px; object-fit: cover;" loading="lazy" decoding="async"></td>
                                                 </tr>

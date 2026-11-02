@@ -4868,5 +4868,11 @@
   "lang_api_key_server_token": "API कुञ्जी / सर्भर टोकन",
   "lang_hidden_for_security": "सुरक्षाका लागि लुकाइएको",
   "lang_not_configured": "सेटअप गरिएको छैन",
-  "lang_microsoft_administrator_setup": "Microsoft प्रशासकको सेटअप"
+  "lang_microsoft_administrator_setup": "Microsoft प्रशासकको सेटअप",
+  "lang_photo": "फोटो",
+  "lang_jpg_png_or_webp": "JPG, PNG वा WebP।",
+  "lang_added_replacement": "प्रतिस्थापन थपियो",
+  "lang_ai_configured": "AI सेटअप भइसकेको छ",
+  "lang_allow_sale_hard_delete": "बिक्रीलाई हार्ड डिलिट गर्न अनुमति दिनुहोस्",
+  "lang_approve_captain_phone": "क्याप्टन फोन स्वीकृत गर्नुहोस्"
 }

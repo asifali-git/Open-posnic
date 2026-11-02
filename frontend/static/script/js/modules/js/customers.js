@@ -770,11 +770,6 @@ PosnicPro.customers = {
         $('#customer_photo_file').off('change.customerPhoto').on('change.customerPhoto', function () {
             var file = this.files && this.files[0];
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                PosnicPro.alert('warning', PosnicPro.i18n.t('lang_photo_must_be_5mb', 'Photo must be 5 MB or smaller'));
-                $(this).val('');
-                return;
-            }
             $('#customer_photo_preview').attr('src', URL.createObjectURL(file));
             $('#customer_photo_remove').show();
         });
